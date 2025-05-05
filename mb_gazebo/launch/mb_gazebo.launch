@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <!--arg name="world_name" value="$(find mb_gazebo)/worlds/skbot.world"/-->
+      <!--arg name="world_name" value="$(find mb_gazebo)/worlds/turtlebot_playground.world"/-->
+      <!--arg name="world_name" value="$(find mb_gazebo)/worlds/postoffice.world"/-->
+      <!--arg name="world_name" value="$(find mb_gazebo)/worlds/barrels.world"/-->
+      <!--arg name="world_name" value="$(find mb_gazebo)/worlds/custom.world"/-->
+      <arg name="world_name" value="$(find mb_gazebo)/worlds/test.world"/>
+      <arg name="gui" value="true"/>
+  </include>
+  
+  <!-- ros_control skbot launch file -->
+  <include file="$(find mb_control)/launch/bot_control.launch" />
+
+  <!-- urdf xml robot description loaded on the Parameter Server, converting the xacro into a proper urdf file-->
+  <param name="robot_description" command="$(find xacro)/xacro $(find mb_description)/urdf/bot.xacro" />
+  
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="MB_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+  args="-urdf -param robot_description -model MB " />
+
+</launch>

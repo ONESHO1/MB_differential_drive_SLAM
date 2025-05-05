@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+
+	<arg name="env_pack" default="$(find beginner_tutorials)" />
+	<arg name="robot_env" default="maps"/>
+	<arg name="robot_radius" default="0.5"/>
+	<arg name="coverage_radius" default="0.5"/>
+	<arg name="use_test_maps" default="false"/>
+	<arg name="select_area" default="false"/>
+	<arg name="map_name" default="temp"/>
+
+
+	<node if="$(arg select_area)" name="masker" pkg="beginner_tutorials" type="masker.py" output="screen">
+               <param name="map_name" value="$(arg map_name)"/>
+               <rosparam file="$(arg env_pack)/$(arg robot_env)/maps.yaml" command="load" />
+        </node>
+        
+	<!--  -->
+	<node ns="room_exploration" pkg="ipa_room_exploration" type="room_exploration_client" name="room_exploration_client" output="screen">
+		<rosparam file="$(arg env_pack)/$(arg robot_env)/maps.yaml" command="load" />
+		<param name="env_pack" value="$(arg env_pack)"/>
+		<param name="robot_env" value="$(arg robot_env)"/>
+		<param name="robot_radius" value="$(arg robot_radius)"/>
+		<param name="coverage_radius" value="$(arg coverage_radius)"/>
+		<param name="use_test_maps" value="$(arg use_test_maps)"/>
+		<param name="select_area" value="$(arg select_area)"/>
+		<param name="map_name" value="$(arg map_name)"/>
+	</node>
+
+
+</launch>

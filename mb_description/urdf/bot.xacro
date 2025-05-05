@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<robot name="bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!--
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 -0.62 0.44"/>
+      <mass value="5"/>
+      <inertia  ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://mb_description/meshes/bodyandwheels.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://mb_description/meshes/bodyandwheels.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  -->
+  
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="chassisHeight" value="0.1"/>
+  <xacro:property name="chassisLength" value="0.4"/>
+  <xacro:property name="chassisWidth" value="0.4"/>
+  <xacro:property name="chassisMass" value="10"/>
+  
+  <xacro:property name="wheelWidth" value="0.05"/>
+  <xacro:property name="wheelRadius" value="0.1"/>
+  <xacro:property name="wheelPos" value="0.25"/>
+  <xacro:property name="wheelMass" value="5"/>
+  
+  <xacro:property name="casterRadius" value="0.05"/>
+  <xacro:property name="casterMass" value="5"/>
+  
+  <xacro:property name="cameraSize" value="0.05"/>
+  <xacro:property name="cameraMass" value="0.1"/>
+  
+  <xacro:include filename="$(find mb_description)/urdf/bot.gazebo" />
+  <xacro:include filename="$(find mb_description)/urdf/materials.xacro" />
+  <xacro:include filename="$(find mb_description)/urdf/macros.xacro" />
+
+  <link name="chassis">
+    <collision>
+      <origin rpy="0 0 1.5708" xyz="-0.47 0 0"/>
+      <geometry>
+        <mesh filename="package://mb_description/meshes/body.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 1.5708" xyz="-0.47 0 0"/>
+      <geometry>
+        <mesh filename="package://mb_description/meshes/body.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 ${wheelRadius}" rpy="0 0 0"/>
+      <mass value="${chassisMass}"/>
+      <xacro:box_inertia m="${chassisMass}" x="${chassisLength}" y="${chassisWidth}" z="${chassisHeight}"/>
+    </inertial>
+  </link>
+  
+  <joint name="fixed" type="fixed">
+    <parent link="chassis"/>
+    <child link="caster_wheel"/>
+  </joint>
+  
+  <link name="caster_wheel">
+    <collision>
+      <origin xyz="${casterRadius-chassisLength/2} 0 ${casterRadius-chassisHeight+wheelRadius}" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="${casterRadius}"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="${casterRadius-chassisLength/2} 0 ${casterRadius-chassisHeight+wheelRadius}" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="${casterRadius}"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <inertial>
+      <origin xyz="${casterRadius-chassisLength/2} 0 ${casterRadius-chassisHeight+wheelRadius}" rpy="0 0 0"/>
+      <mass value="${casterMass}"/>
+      <xacro:sphere_inertia m="${0}" r="${casterRadius}"/>
+    </inertial>
+  </link>
+  
+  <xacro:wheel lr="left" tY="1"/>
+  <xacro:wheel lr="right" tY="-1"/>
+  
+  <joint name="back_joint" type="prismatic">
+    <parent link="chassis"/>
+    <child link="back_wiper"/>
+    <origin rpy="0 0 0" xyz="-0.356 0 0.1"/>
+    <limit lower = "0.01" upper="0.05" effort="100.0" velocity="0.1"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  
+  <link name="back_wiper">
+    <collision>
+      <origin rpy="0 0 1.5708" xyz="-0.114 0 -0.1"/>
+      <geometry>
+        <mesh filename="package://mb_description/meshes/back_thing.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 1.5708" xyz="-0.114 0 -0.1"/>
+      <geometry>
+        <mesh filename="package://mb_description/meshes/back_thing.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 ${wheelRadius}" rpy="0 0 0"/>
+      <mass value="5"/>
+      <xacro:cylinder_inertia m="5" r="0" h="0.1"/>
+    </inertial>
+  </link>
+  
+   <transmission name="back_trans">
+     <type>transmission_interface/SimpleTransmission</type>
+     <joint name="back_joint">
+       <hardwareInterface>PositionJointInterface</hardwareInterface>
+     </joint>
+     <actuator name="act2">
+       <hardwareInterface>PositionJointInterface</hardwareInterface>
+     </actuator>
+   </transmission>
+  
+   <joint name="front_joint" type="prismatic">
+     <parent link="chassis"/>
+     <child link="scrubber"/>
+     <origin rpy="0 0 0" xyz="0.5 0 0.2"/>
+     <limit lower = "0" upper="0.05" effort="100.0" velocity="0.1"/>
+     <axis xyz="0 0 1"/>
+   </joint>
+  
+   <link name="scrubber">
+     <collision>
+       <origin rpy="0 0 1.5708" xyz="-1 0 -0.205"/>
+       <geometry>
+         <mesh filename="package://mb_description/meshes/scrubber.stl" scale="0.001 0.001 0.001"/>
+       </geometry>
+     </collision>
+     <visual>
+       <origin rpy="0 0 1.5708" xyz="-1 0 -0.205"/>
+       <geometry>
+         <mesh filename="package://mb_description/meshes/scrubber.stl" scale="0.001 0.001 0.001"/>
+       </geometry>
+     </visual>
+     <inertial>
+       <origin xyz="0 0 ${wheelRadius}" rpy="0 0 0"/>
+       <mass value="5"/>
+       <xacro:cylinder_inertia m="5" r="0" h="0.1"/>
+     </inertial>
+   </link>
+   
+   <transmission name="scrubber_trans">
+     <type>transmission_interface/SimpleTransmission</type>
+     <joint name="front_joint">
+       <hardwareInterface>PositionJointInterface</hardwareInterface>
+     </joint>
+     <actuator name="act1">
+       <hardwareInterface>PositionJointInterface</hardwareInterface>
+     </actuator>
+   </transmission>
+   
+   <joint name="hokuyo_joint" type="fixed">
+     <axis xyz="0 1 0" />
+     <origin xyz="-0.35 0 1.15" rpy="0 0 0"/>
+     <parent link="chassis"/>
+     <child link="hokuyo"/>
+   </joint>
+   
+   <link name="hokuyo">
+     <collision>
+       <origin xyz="0 0 0" rpy="0 0 0"/>
+       <geometry>
+         <box size="0.1 0.1 0.1"/>
+       </geometry>
+     </collision>
+
+     <visual>
+       <origin xyz="0 0 0" rpy="0 0 0"/>
+       <geometry>
+         <mesh filename="package://mb_description/meshes/hokuyo.dae"/>
+       </geometry>
+     </visual>
+
+     <inertial>
+       <mass value="1e-5" />
+       <origin xyz="0 0 0" rpy="0 0 0"/>
+       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+     </inertial>
+   </link>
+    
+</robot>

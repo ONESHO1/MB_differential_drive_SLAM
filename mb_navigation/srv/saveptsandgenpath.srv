@@ -1,0 +1,7 @@
+int64[] x_pts
+int64[] y_pts
+string file_name
+
+---
+
+string result

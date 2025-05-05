@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot>
+ <gazebo reference="chassis">
+   <material>Gazebo/Orange</material>
+ </gazebo>
+ 
+ <gazebo reference="caster_wheel">
+   <mu1>0.0</mu1>
+   <mu2>0.0</mu2>
+  <material>Gazebo/Red</material>
+ </gazebo>
+ 
+ <gazebo reference="back_wiper">
+   <mu1>0.0</mu1>
+   <mu2>0.0</mu2>
+  <material>Gazebo/White</material>
+ </gazebo>
+ 
+ <gazebo>
+   <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+     <robotNamespace>/MB</robotNamespace>
+   </plugin>
+ </gazebo>
+ <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100</updateRate>
+      <leftJoint>left_wheel_hinge</leftJoint>
+      <rightJoint>right_wheel_hinge</rightJoint>
+      <wheelSeparation>${chassisWidth+wheelWidth}</wheelSeparation>
+      <wheelDiameter>${2*wheelRadius}</wheelDiameter>
+      <torque>20</torque>
+      <commandTopic>/MB/cmd_vel</commandTopic>
+      <odometryTopic>/MB/odom</odometryTopic>
+      <odometryFrame>/MB/odom</odometryFrame>
+      <robotBaseFrame>chassis</robotBaseFrame>
+      <!--robotBaseFrame>footprint</robotBaseFrame-->
+    </plugin>
+ </gazebo>
+ 
+ <!-- Adding a hokuyo Laser Scanner -->
+  <gazebo reference="hokuyo">
+    <sensor type="ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/MB/laser_scan</topicName>
+        <frameName>hokuyo</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+ 
+</robot>
